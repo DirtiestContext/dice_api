@@ -5,6 +5,7 @@ import lombok.ToString
 @ToString
 class RollRequest {
 
+	//need to pick a limit for these
 	Integer numberOfD2
 	Integer numberOfD4
 	Integer numberOfD6

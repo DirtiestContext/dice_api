@@ -10,22 +10,7 @@ import org.springframework.stereotype.Service
 class RollService {
 
 	//create
-	Roll buildRoll(RollRequest rollRequest) {
-		Roll newRoll = new Roll()
-		newRoll.rollRequestArray = buildRollArray(buildRollList(rollRequest))
-		newRoll
-	}
-
-	List<Integer> buildRollList(RollRequest rollRequest) {
-		List<Integer> rollRequestList = rollRequest.findAll()
-		rollRequestList
-	}
-
-	Integer[] buildRollArray(List<Integer> rollList) {
-		Integer[] rollArray = new Integer[rollList.size()]
-		rollList.toArray(rollArray)
-		rollArray
-	}
-
+	//read
+	//update
 	//delete
 }
