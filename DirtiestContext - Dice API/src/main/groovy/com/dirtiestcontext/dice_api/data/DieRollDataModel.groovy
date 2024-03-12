@@ -7,7 +7,6 @@ import lombok.Data
 class DieRollDataModel {
 
 	Long ID
-	String sessionGuid
 	Die die
 	Integer rollResult
 

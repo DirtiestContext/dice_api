@@ -4,8 +4,8 @@ import com.dirtiestcontext.dice_api.enums.Die
 import lombok.ToString
 
 @ToString
-class Dice {
+class DicePostRoll {
 
-	//Integer is number of that specific Die to roll
-	public static EnumMap<Die, Integer> dieToRoll
+	EnumMap<Die, Integer[]> rollResultsMap
+
 }

@@ -1,73 +1,84 @@
 package com.dirtiestcontext.dice_api.services
 
 import com.dirtiestcontext.dice_api.enums.Die
-import com.dirtiestcontext.dice_api.models.Dice
-import com.dirtiestcontext.dice_api.models.Roll
+import com.dirtiestcontext.dice_api.maps.DiceMappingService
+import com.dirtiestcontext.dice_api.maps.RollMappingService
+import com.dirtiestcontext.dice_api.models.DicePostRoll
+import com.dirtiestcontext.dice_api.models.DicePreRoll
+import com.dirtiestcontext.dice_api.requests.RollRequest
+import com.dirtiestcontext.dice_api.responses.RollResponse
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Slf4j
 @Service
 class DiceService {
 
-	//create
-	Dice createDiceFromRoll(Roll roll) {
-		EnumMap<Die, Integer> dieMap = buildDieMap()
-		EnumMap<Die,Integer> updatedDieMap = completeDieMap(roll, dieMap)
-		Dice dice = new Dice()
-		dice.dieToRoll == updatedDieMap
-		dice
+	@Autowired
+	DiceMappingService diceMappingService
 
+	@Autowired
+	RollMappingService rollMappingService
+
+	@Autowired
+	RollService rollService
+
+	RollResponse wholeProcess(RollRequest rollRequest) {
+		DicePreRoll dicePreRoll = buildDicePreRoll(rollRequest)
+		DicePostRoll dicePostRoll = rollingTheDice(dicePreRoll)
+
+		buildRollResponse(dicePostRoll)
 	}
 
-	EnumMap<Die, Integer> completeDieMap(Roll roll, EnumMap<Die, Integer> dieMap) {
-		EnumMap<Die, Integer> updatedMap = new EnumMap<>(Die)
-		dieMap.replace(Die.D2, roll.rollRequestArray[0])
-		dieMap.replace(Die.D4, roll.rollRequestArray[1])
-		dieMap.replace(Die.D5, roll.rollRequestArray[2])
-		dieMap.replace(Die.D6, roll.rollRequestArray[3])
-		dieMap.replace(Die.D8, roll.rollRequestArray[4])
-		dieMap.replace(Die.D10, roll.rollRequestArray[5])
-		dieMap.replace(Die.D12, roll.rollRequestArray[6])
-		dieMap.replace(Die.D20, roll.rollRequestArray[7])
-		dieMap.replace(Die.D100, roll.rollRequestArray[8])
-		updatedMap == dieMap
-		updatedMap
-
+	DicePreRoll buildDicePreRoll(RollRequest rollRequest) {
+		diceMappingService.mapRollRequestToDicePreRoll(rollRequest, buildEmptyDieMap())
 	}
 
-	EnumMap<Die, Integer> buildDieMap() {
-		EnumSet<Die> dieEnumSet = EnumSet.allOf(Die)
-		EnumMap<Die, Integer> dieIntegerEnumMap = new EnumMap<>(Die)
-		for(Die die : dieEnumSet) {
-			dieIntegerEnumMap.put(die, 0)
+	DicePostRoll rollingTheDice(DicePreRoll dicePreRoll) {
+		EnumMap<Die, Integer> dieMap = dicePreRoll.dieToRoll
+		DicePostRoll dicePostRoll = new DicePostRoll()
+		EnumMap<Die, Integer[]> resultsMap = new EnumMap<>(Die)
+
+		for(Die die : dieMap.keySet()) {
+			Integer numberOfTimesToRoll = dieMap.get(die)
+			Integer[] resultsArray = rollService.resultsArrayPerDie(die, numberOfTimesToRoll)
+			resultsMap.put(die, resultsArray)
 		}
-		dieIntegerEnumMap
+
+		dicePostRoll.rollResultsMap = resultsMap
+		dicePostRoll
 	}
-	//read
-	Integer numberOfTimesToRoll(Die die, Dice dice) {
-		dice.dieToRoll.get(die)
+
+	RollResponse buildRollResponse(DicePostRoll dicePostRoll) {
+		EnumMap<Die, Integer> dieRollTotals = resultsTotalsPerDie(dicePostRoll)
+		Long rollTotal = rollResultTotal(dieRollTotals)
+
+		//save the RollDataModel here eventually
+		rollMappingService.mapDicePostRollToRollResponse(dicePostRoll, dieRollTotals, rollTotal)
 	}
-	//update
-	Dice updateOneDie(Dice dice, Die die, Integer numberOfTimesToRoll) {
-		Dice updatedDice
-		dice.dieToRoll.replace(die, numberOfTimesToRoll)
-		updatedDice = dice
-		updatedDice
-	}
-	//delete
-	Dice resetOneDie(Dice dice, Die die) {
-		Dice updatedDice
-		dice.dieToRoll.replace(die, 0)
-		updatedDice = dice
-		updatedDice
-	}
-	//deleteAll
-	Dice resetAllDie(Dice dice) {
-		Dice updatedDice = new Dice()
-		for(Die die : dice.dieToRoll.keySet()) {
-			updatedDice.dieToRoll.put(die, 0)
+
+	EnumMap<Die, Integer> buildEmptyDieMap() {
+		EnumSet<Die> dieSet = EnumSet.allOf(Die)
+		EnumMap<Die, Integer> dieMap = new EnumMap<>(Die)
+		for(Die die : dieSet) {
+			dieMap.put(die, 0)
 		}
-		updatedDice
+		dieMap
 	}
+
+	EnumMap<Die, Integer> resultsTotalsPerDie(DicePostRoll dicePostRoll) {
+		EnumMap<Die, Integer> totalsMap = new EnumMap<>(Die)
+		EnumMap<Die, Integer[]> rollResultsMap = dicePostRoll.rollResultsMap
+		for(Die die : rollResultsMap.keySet()) {
+			Integer rollTotal = rollService.resultOfAllRollsPerDie(rollResultsMap.get(die))
+			totalsMap.put(die, rollTotal)
+		}
+		totalsMap
+	}
+
+	Long rollResultTotal(EnumMap<Die, Integer> totalsMap) {
+		rollService.resultsTotalOfRoll(totalsMap)
+	}
+
 }

@@ -1,54 +1,59 @@
 package com.dirtiestcontext.dice_api.services
 
-import com.dirtiestcontext.dice_api.models.Roll
-import com.dirtiestcontext.dice_api.requests.RollRequest
-import com.dirtiestcontext.dice_api.responses.RollResponse
-import com.dirtiestcontext.dice_api.respositories.RollRepository
+import com.dirtiestcontext.dice_api.enums.Die
+import com.dirtiestcontext.dice_api.models.DicePostRoll
+import com.dirtiestcontext.dice_api.models.DicePreRoll
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
+
+import java.util.concurrent.ThreadLocalRandom
+
+//Place the logic behind rolling the dice here
 
 @Slf4j
 @Service
 class RollService {
 
-	@Autowired
-	RollRepository rollRepository
-
-	//create
-	Roll createRollFromRequest(RollRequest rollRequest) {
-		Integer[] rollArray = new Integer[9]
-		Roll roll = new Roll()
-		rollArray[0] == rollRequest.numberOfD2
-		rollArray[1] == rollRequest.numberOfD4
-		rollArray[2] == rollRequest.numberOfD5
-		rollArray[3] == rollRequest.numberOfD6
-		rollArray[4] == rollRequest.numberOfD8
-		rollArray[5] == rollRequest.numberOfD10
-		rollArray[6] == rollRequest.numberOfD12
-		rollArray[7] == rollRequest.numberOfD20
-		rollArray[8] == rollRequest.numberOfD100
-		roll.rollRequestArray = rollArray
-		roll
+	//the actual die roll
+	Integer roll(Die die) {
+		Integer numberOfSides = Die.returnNumberOfSides(die)
+		//lower bound inclusive, upper bond exclusive
+		Integer rollResult = ThreadLocalRandom.current().nextInt(1, (numberOfSides + 1))
+		//save this eventually
+		rollResult
 	}
-	//read
-	List<Integer> readRollArray(Roll roll) {
-		List<Integer> rollList = new ArrayList<>(9)
-		for(Integer numberOfDie : roll.rollRequestArray) {
-			rollList.add(numberOfDie)
+
+	Integer[] resultsArrayPerDie(Die die, Integer numberOfTimesToRoll) {
+		if(numberOfTimesToRoll > 0) {
+			Integer[] resultsForDieRolls = new Integer[numberOfTimesToRoll]
+			int index
+			for(index = 0; index < numberOfTimesToRoll; index++){
+				resultsForDieRolls[index] = roll(die)
+			}
+			resultsForDieRolls
+		} else {
+			Integer[] resultsForDieRolls = new Integer[1]
+			resultsForDieRolls[0] = 0
+			resultsForDieRolls
 		}
-		rollList
 	}
-	//update
-	Roll updateRollArray(Roll roll, int arrayIndex, Integer newNumberOfDie) {
-		roll.rollRequestArray[arrayIndex] == newNumberOfDie
-		roll
-	}
-	//delete
-	void deleteRoll(Roll roll) {
 
+	Integer resultOfAllRollsPerDie(Integer[] resultsArray) {
+		Integer resultsTotal = 0
+		for(Integer rollResult : resultsArray) {
+			resultsTotal = resultsTotal + rollResult
+		}
+		resultsTotal
 	}
+
+	Long resultsTotalOfRoll(EnumMap<Die, Integer> resultsMap) {
+		Long totalOfRoll = 0
+		for(Die die : resultsMap.keySet()) {
+			totalOfRoll = totalOfRoll + resultsMap.get(die)
+		}
+		totalOfRoll
+	}
+
+
 }
