@@ -10,7 +10,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 
-//research MDC
+//research MDC?
+//integrate with swagger?
 @Slf4j
 @Controller
 class DiceController {
