@@ -8,6 +8,7 @@ class RollRequest {
 	//need to pick a limit for these
 	Integer numberOfD2
 	Integer numberOfD4
+	Integer numberOfD5
 	Integer numberOfD6
 	Integer numberOfD8
 	Integer numberOfD10

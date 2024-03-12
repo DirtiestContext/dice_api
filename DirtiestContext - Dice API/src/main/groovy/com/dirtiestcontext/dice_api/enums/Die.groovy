@@ -1,5 +1,6 @@
 package com.dirtiestcontext.dice_api.enums
 
+import com.dirtiestcontext.dice_api.exceptions.DieException
 import groovy.util.logging.Slf4j
 
 @Slf4j
@@ -26,8 +27,8 @@ enum Die {
 	}
 
 	//methods for working with Die
-	public EnumSet<Die> dieEnumSet = EnumSet.allOf(Die)
-	public Die returnEnum(Integer numberOfSides) {
+
+	Die returnEnum(Integer numberOfSides) {
 		try {
 			switch(numberOfSides) {
 				case 2 : D2
@@ -50,7 +51,34 @@ enum Die {
 					break
 			}
 		} finally {
-			//throw error
+			throw new DieException('That is not a value associated with a Die.')
+		}
+	}
+
+	Integer returnNumberOfSides(Die die) {
+		try {
+			switch(die) {
+				case D2 : 2
+					break
+				case D4 : 4
+					break
+				case D5 : 5
+					break
+				case D6 : 6
+					break
+				case D8 : 8
+					break
+				case D10 : 10
+					break
+				case D12 : 12
+					break
+				case D20 : 20
+					break
+				case D100 : 100
+					break
+			}
+		} finally {
+			throw new DieException('That is not a valid Die type.')
 		}
 	}
 }
