@@ -1,10 +1,7 @@
 package com.dirtiestcontext.dice_api.services
 
 import com.dirtiestcontext.dice_api.enums.Die
-import com.dirtiestcontext.dice_api.models.DicePostRoll
-import com.dirtiestcontext.dice_api.models.DicePreRoll
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import java.util.concurrent.ThreadLocalRandom
